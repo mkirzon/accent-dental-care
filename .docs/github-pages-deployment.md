@@ -2,113 +2,139 @@
 
 ## Overview
 
-This project is a React + Vite static site deployed to GitHub Pages via the `gh-pages` package.
+This project is a React + Vite static site deployed to GitHub Pages. The production build outputs to a `docs/` folder, which GitHub Pages serves directly from the repository branch.
 
 **Live URL:** https://mkirzon.github.io/accent-dental-care/
 
 ---
 
-## How It Works
+## Architecture
 
-The deployment pipeline consists of three key configurations:
+### Why `docs/` and not `dist/`?
 
-### 1. Vite Base Path (`vite.config.ts`)
+Vite's default output folder is `dist/`, but we configure it to output to `docs/` instead. This is the recommended GitHub Pages pattern: the `docs/` folder is committed to the repository, and GitHub Pages is pointed at it. This avoids needing a separate CI/CD pipeline or a `gh-pages` branch.
 
-```ts
-export default defineConfig({
-  base: '/accent-dental-care/',
-  plugins: [react()],
-})
-```
+### Why `HashRouter` and not `BrowserRouter`?
 
-The `base` setting tells Vite that the site will be served from the `/accent-dental-care/` subpath (required for repository-based GitHub Pages, as opposed to the `username.github.io` site).
-
-### 2. Hash Routing (`src/App.tsx`)
-
-```tsx
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-```
-
-GitHub Pages is a static hosting service and cannot handle client-side route fallbacks. Using `HashRouter` instead of `BrowserRouter` ensures all routes work by encoding the path after the `#` (e.g., `/#/about`), which the server never sees — the JS handles all routing.
-
-### 3. Deploy Scripts (`package.json`)
-
-```json
-{
-  "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
-  }
-}
-```
-
-- **`predeploy`** — Runs automatically before `deploy`. It builds the production bundle into the `dist/` folder.
-- **`deploy`** — Pushes the contents of `dist/` to the `gh-pages` branch on GitHub, which triggers the GitHub Pages deployment.
+GitHub Pages is static file hosting — it has no server-side router to fall back to `index.html` for unknown paths. `BrowserRouter` uses real URL paths (e.g., `/about`), which 404 when loaded directly. `HashRouter` encodes routes after `#` (e.g., `/#/about`), which the browser's JS handles entirely without server involvement.
 
 ---
 
-## Deployment Steps
+## Key Configuration Files
 
-To build and deploy the site:
+| File | Setting | Purpose |
+|------|---------|---------|
+| `vite.config.ts` | `base: '/accent-dental-care/'` | Tells Vite the site is served from a subdirectory (repo name) |
+| `vite.config.ts` | `build.outDir: 'docs'` | Outputs production build to `docs/` instead of `dist/` |
+| `src/App.tsx` | `HashRouter as Router` | SPA routing compatible with static hosting |
+| `.gitignore` | `dist` listed | The old `dist/` folder is ignored; only `docs/` is committed |
+
+---
+
+## One-Time Setup (GitHub Side)
+
+Before the first deployment, configure GitHub Pages:
+
+1. Go to **https://github.com/mkirzon/accent-dental-care/settings/pages**
+2. Under **Build and deployment** → **Source**, select **Deploy from a branch**
+3. Under **Branch**, select your branch (e.g., `main`) and the **`/docs`** folder
+4. Click **Save**
+
+GitHub will publish within 1–2 minutes.
+
+---
+
+## Build and Deploy
 
 ```bash
-# Step 1: Install dependencies (first time only)
+# Install dependencies (first time only)
 npm install
 
-# Step 2: Build and deploy in one command
-npm run deploy
+# Build the production bundle (outputs to docs/)
+npm run build
+
+# Commit and push the docs/ folder
+git add docs
+git commit -m "build: update production site"
+git push origin <branch>
+
+# GitHub Pages auto-deploys from the docs/ folder
 ```
 
-That's it. The `predeploy` script runs the build automatically, then `gh-pages` publishes the output.
-
-### Step-by-step breakdown
+### What each step does
 
 | Step | Command | What it does |
 |------|---------|-------------|
-| 1 | `npm run build` | Runs TypeScript type checking (`tsc -b`) then Vite production build (`vite build`) → outputs to `dist/` |
-| 2 | `gh-pages -d dist` | Commits the `dist/` folder contents to the `gh-pages` branch and pushes to GitHub |
-| 3 | GitHub Pages | Automatically serves the `gh-pages` branch at `https://mkirzon.github.io/accent-dental-care/` |
+| 1 | `npm run build` | Runs TypeScript type-check (`tsc -b`) then Vite production build (`vite build`) → outputs to `docs/` |
+| 2 | `git add docs && git commit` | Stages the new build artifacts |
+| 3 | `git push` | Pushes to the remote; GitHub Pages detects the change and deploys |
 
 ---
 
 ## Development Workflow
 
 ```bash
-# Local development server
+# Local development server (hot-reload, source maps)
 npm run dev
 
-# Preview the production build locally
+# Preview the production build locally before pushing
 npm run build
-npm run preview
+npm run preview        # serves docs/ locally at localhost:4173
 
-# Deploy to GitHub Pages
-npm run deploy
+# When ready, commit and push docs/ to deploy
+git add docs
+git commit -m "build: deploy update"
+git push origin main
 ```
+
+---
+
+## Branch Workflow
+
+This project uses branches for development. The typical flow:
+
+1. Work on a feature branch (e.g., `first-ai-pass`)
+2. Build locally: `npm run build` → verifies everything compiles
+3. Commit changes including the `docs/` folder
+4. Push branch, open a Pull Request
+5. After PR is merged to `main`, the `docs/` folder on `main` is what GitHub Pages serves
+
+> **Note:** Always run `npm run build` before opening a PR so the `docs/` folder in the branch reflects the latest production output.
 
 ---
 
 ## Troubleshooting
 
-### Blank page after deployment
-- Check the browser console for 404 errors on assets
-- Verify `base: '/accent-dental-care/'` in `vite.config.ts` matches the repo name
-- Clear browser cache
+### Blank white page after deployment
+- Open browser DevTools → Console tab → look for 404 errors on JS/CSS assets
+- Verify `base: '/accent-dental-care/'` in `vite.config.ts` matches the repository name exactly
+- Hard refresh the page (`Cmd+Shift+R` / `Ctrl+Shift+R`) to clear cache
 
-### Routes not working
-- Ensure `HashRouter` is used (not `BrowserRouter`) in `src/App.tsx`
-- Links should use `to="/path"` with React Router's `<Link>` component
+### Routes not working (page not found when navigating)
+- Confirm `HashRouter` is used in `src/App.tsx` (not `BrowserRouter`)
+- All internal navigation should use React Router's `<Link to="/path">` component
 
-### Build fails
-- Run `npm run build` locally to see error details
-- Check TypeScript errors with `npx tsc --noEmit`
+### Build fails locally
+- Run `npm run build` to see full error output
+- Check TypeScript errors: `npx tsc --noEmit`
+- Ensure all dependencies are installed: `npm install`
+
+### GitHub Pages shows old version
+- Wait 1–2 minutes for GitHub to finish deploying (check deployment status in repo Settings → Pages)
+- Clear browser cache or use incognito mode
 
 ---
 
-## Key Files
+## Folder Structure (Build Output)
 
-| File | Purpose |
-|------|---------|
-| `vite.config.ts` | Sets `base` path for GitHub Pages subdirectory |
-| `src/App.tsx` | Uses `HashRouter` for client-side routing compatibility |
-| `package.json` | Contains `predeploy` and `deploy` scripts |
-| `dist/` | Production build output (gitignored, deployed to `gh-pages` branch) |
+```
+docs/
+├── index.html            ← entry point
+├── favicon.svg           ← site icon (copied from public/)
+├── icons.svg             ← icon sprite (copied from public/)
+└── assets/
+    ├── index-*.css       ← compiled Tailwind CSS
+    └── index-*.js        ← bundled React app + vendor code
+```
+
+The `docs/` folder is committed to the repository. The `dist/` folder (Vite default) is in `.gitignore` and is not used for deployment.
