@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { services } from '../data/content';
-import { practice } from '../data/content';
 
 const serviceCards = [
   {
