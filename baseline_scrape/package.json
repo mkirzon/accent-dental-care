@@ -1,0 +1,19 @@
+{
+  "name": "archive",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "fs-extra": "^11.3.5",
+    "jsdom": "^29.1.1",
+    "playwright": "^1.60.0"
+  }
+}

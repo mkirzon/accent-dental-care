@@ -1,0 +1,17 @@
+# Archive folder gitignore
+
+# Ignore node_modules directory (if it gets created)
+node_modules/
+
+# Ignore package-lock.json (auto-generated)
+package-lock.json
+
+# But keep the main site-content.json file (this is the actual content)
+!site-content.json
+
+# Ignore temp files and logs
+*.log
+temp/
+
+# Ignore OS-specific files
+.DS_Store
