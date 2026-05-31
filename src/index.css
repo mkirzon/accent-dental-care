@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #f0f9f1;
+  --color-brand-100: #d7f1e0;
+  --color-brand-200: #b5e4c8;
+  --color-brand-300: #8fd1ab;
+  --color-brand-400: #66bb8e;
+  --color-brand-500: #3da572;
+  --color-brand-600: #2b865a;
+  --color-brand-700: #246b4b;
+  --color-brand-800: #1f543d;
+  --color-brand-900: #1a4635;
+  --color-brand-950: #0f2a20;
+
+  --color-warm-50: #fdf8f0;
+  --color-warm-100: #f9edda;
+  --color-warm-200: #f2d7b4;
+  --color-warm-300: #e9ba85;
+  --color-warm-400: #df9a54;
+  --color-warm-500: #d68233;
+  --color-warm-600: #c46923;
+  --color-warm-700: #a4521c;
+  --color-warm-800: #85421d;
+  --color-warm-900: #6d371a;
+  --color-warm-950: #3d1c0b;
+
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
